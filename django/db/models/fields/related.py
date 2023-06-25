@@ -1192,12 +1192,12 @@ class ForeignKey(ForeignObject):
 
     @functools.lru_cache(maxsize=128)
     def _get_col(self, alias, output_field=None):
-        from django.db.models.expressions import Col, FastCol
+        from django.db.models.expressions import Col
 
-        if (self.name or self.db_column or "").lower() == (
-            self.name or self.db_column or ""
+        if alias == self.model._meta.db_table and (
+            output_field is None or output_field == self
         ):
-            Col = FastCol
+            return Col(alias, self, output_field)
 
         # print("miss")
         return Col(alias, self, output_field)

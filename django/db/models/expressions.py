@@ -1139,6 +1139,7 @@ class Col(Expression):
         identifiers = (
             (self.alias, self.target.column) if self.alias else (self.target.column,)
         )
+        return ".".join(identifiers), []
         sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
         return sql, []
 
@@ -1158,18 +1159,6 @@ class Col(Expression):
         return self.output_field.get_db_converters(
             connection
         ) + self.target.get_db_converters(connection)
-
-
-class FastCol(Col):
-    def as_sql(self, compiler, connection):
-        if not hasattr(self, "_sql"):
-            identifiers = (
-                (self.alias, self.target.column)
-                if self.alias
-                else (self.target.column,)
-            )
-            self._sql = ".".join(identifiers), []
-        return self._sql
 
 
 class Ref(Expression):
