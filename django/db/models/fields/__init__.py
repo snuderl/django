@@ -225,6 +225,10 @@ class Field(RegisterLookupMixin):
         self.db_comment = db_comment
         self._db_tablespace = db_tablespace
         self.auto_created = auto_created
+        if self.db_column:
+            self.can_use_fast_column = self.db_column.lower() == self
+        elif name:
+            self.can_use_fast_column = name.lower() == self
 
         # Adjust the appropriate creation counter, and save our local copy.
         if auto_created:
@@ -494,13 +498,23 @@ class Field(RegisterLookupMixin):
             output_field is None or output_field == self
         ):
             return self.cached_col
-        from django.db.models.expressions import Col
+        from django.db.models.expressions import Col, FastCol
+
+        if (self.name or self.db_column or "").lower() == (
+            self.name or self.db_column or ""
+        ):
+            return FastCol(self.model._meta.db_table, self)
 
         return Col(alias, self, output_field)
 
     @cached_property
     def cached_col(self):
-        from django.db.models.expressions import Col
+        from django.db.models.expressions import Col, FastCol
+
+        if (self.name or self.db_column or "").lower() == (
+            self.name or self.db_column or ""
+        ):
+            return FastCol(self.model._meta.db_table, self)
 
         return Col(self.model._meta.db_table, self)
 
