@@ -1132,8 +1132,10 @@ class Col(Expression):
         return "{}({})".format(self.__class__.__name__, ", ".join(identifiers))
 
     def as_sql(self, compiler, connection):
-        alias, column = self.alias, self.target.column
-        identifiers = (alias, column) if alias else (column,)
+        identifiers = (
+            (self.alias, self.target.column) if self.alias else (self.target.column,)
+        )
+        return ".".join(identifiers), []
         sql = ".".join(map(compiler.quote_name_unless_alias, identifiers))
         return sql, []
 
