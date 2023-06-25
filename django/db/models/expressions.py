@@ -272,17 +272,21 @@ class BaseExpression:
 
         Return: an Expression to be added to the query.
         """
-        c = self.copy()
-        c.is_summary = summarize
-        c.set_source_expressions(
-            [
-                expr.resolve_expression(query, allow_joins, reuse, summarize)
-                if expr
-                else None
-                for expr in c.get_source_expressions()
-            ]
-        )
-        return c
+        expressions = self.get_source_expressions()
+        if self.is_summary != summarize or expressions:
+            c = self.copy()
+
+            c.is_summary = summarize
+            c.set_source_expressions(
+                [
+                    expr.resolve_expression(query, allow_joins, reuse, summarize)
+                    if expr
+                    else None
+                    for expr in c.get_source_expressions()
+                ]
+            )
+            return c
+        return self
 
     @property
     def conditional(self):
